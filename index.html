@@ -23,7 +23,7 @@
       })
       .catch((err) => {
         console.error("LIFFの初期化に失敗しました: ", err);
-        // 初期化に失敗した場合も全パラメータをnullでリダイレクト
+        // 初期化に失敗した場合は全パラメータを "null" でリダイレクト
         redirectWithNull();
       });
 
@@ -36,19 +36,11 @@
           const lineID = profile.userId ? profile.userId : "null";
           const iconURL = profile.pictureUrl ? profile.pictureUrl : "null";
 
-          // メールアドレス取得 (メールアドレスの取得には "email" スコープが必要)
-          let email = "null";
-          const idToken = liff.getDecodedIDToken();
-          if (idToken && idToken.email) {
-            email = idToken.email;
-          }
-
           // リダイレクト先のURLを組み立てる
           let redirectUrl = "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec";
           redirectUrl += "?lineID=" + encodeURIComponent(lineID);
           redirectUrl += "&userName=" + encodeURIComponent(userName);
           redirectUrl += "&iconURL=" + encodeURIComponent(iconURL);
-          redirectUrl += "&email=" + encodeURIComponent(email);
 
           // 組み立てたURLにリダイレクト
           window.location.href = redirectUrl;
@@ -66,9 +58,12 @@
       redirectUrl += "?lineID=" + encodeURIComponent("null");
       redirectUrl += "&userName=" + encodeURIComponent("null");
       redirectUrl += "&iconURL=" + encodeURIComponent("null");
-      redirectUrl += "&email=" + encodeURIComponent("null");
       window.location.href = redirectUrl;
     }
+  </script>
+</body>
+</html>
+
   </script>
 </body>
 </html>
