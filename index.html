@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>LIFF Profile Redirect</title>
+  <!-- LIFF SDKの読み込み -->
+  <script src="https://static.line-scdn.net/liff/edge/versions/2.14.0/sdk.js"></script>
+</head>
+<body>
+  <script>
+    // LIFF初期化時のLIFF IDを設定してください
+    const liffId = "YOUR_LIFF_ID";  // ※ご自身のLIFF IDに置き換えてください
+
+    // LIFFの初期化
+    liff.init({ liffId: liffId })
+      .then(() => {
+        // 未ログインの場合はログイン画面へリダイレクト
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          getProfileAndRedirect();
+        }
+      })
+      .catch((err) => {
+        console.error("LIFFの初期化に失敗しました: ", err);
+      });
+
+    // ユーザー情報の取得とリダイレクトを実行する関数
+    function getProfileAndRedirect() {
+      // ユーザーのプロフィール情報を取得
+      liff.getProfile()
+        .then(profile => {
+          const userName = profile.displayName;
+          const lineID = profile.userId;
+          const iconURL = profile.pictureUrl;
+
+          // メールアドレスの取得
+          // ※メールアドレス取得には"email"スコープが必要です。IDトークンに含まれている場合に取得します。
+          let email = "";
+          const idToken = liff.getDecodedIDToken();
+          if (idToken && idToken.email) {
+            email = idToken.email;
+          }
+
+          // リダイレクト先のURLを組み立てる
+          let redirectUrl = "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec";
+          redirectUrl += "?lineID=" + encodeURIComponent(lineID);
+          redirectUrl += "&userName=" + encodeURIComponent(userName);
+          redirectUrl += "&iconURL=" + encodeURIComponent(iconURL);
+          redirectUrl += "&email=" + encodeURIComponent(email);
+
+          // 組み立てたURLにリダイレクト
+          window.location.href = redirectUrl;
+        })
+        .catch((err) => {
+          console.error("プロフィール情報の取得に失敗しました: ", err);
+        });
+    }
+  </script>
+</body>
+</html>
