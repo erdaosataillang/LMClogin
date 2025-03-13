@@ -8,8 +8,8 @@
 </head>
 <body>
   <script>
-    // LIFF初期化時のLIFF IDを設定してください
-    const liffId = "2007060333-7KJQnW68";  // ※ご自身のLIFF IDに置き換えてください
+    // LIFF IDを設定
+    const liffId = "2007060333-7KJQnW68";
 
     // LIFFの初期化
     liff.init({ liffId: liffId })
@@ -23,20 +23,21 @@
       })
       .catch((err) => {
         console.error("LIFFの初期化に失敗しました: ", err);
+        // 初期化に失敗した場合も全パラメータをnullでリダイレクト
+        redirectWithNull();
       });
 
-    // ユーザー情報の取得とリダイレクトを実行する関数
+    // プロフィール情報を取得し、リダイレクトする関数
     function getProfileAndRedirect() {
-      // ユーザーのプロフィール情報を取得
       liff.getProfile()
         .then(profile => {
-          const userName = profile.displayName;
-          const lineID = profile.userId;
-          const iconURL = profile.pictureUrl;
+          // 取得できなかった場合は "null" を設定
+          const userName = profile.displayName ? profile.displayName : "null";
+          const lineID = profile.userId ? profile.userId : "null";
+          const iconURL = profile.pictureUrl ? profile.pictureUrl : "null";
 
-          // メールアドレスの取得
-          // ※メールアドレス取得には"email"スコープが必要です。IDトークンに含まれている場合に取得します。
-          let email = "";
+          // メールアドレス取得 (メールアドレスの取得には "email" スコープが必要)
+          let email = "null";
           const idToken = liff.getDecodedIDToken();
           if (idToken && idToken.email) {
             email = idToken.email;
@@ -54,7 +55,19 @@
         })
         .catch((err) => {
           console.error("プロフィール情報の取得に失敗しました: ", err);
+          // プロフィール情報の取得に失敗した場合は全パラメータを "null" にしてリダイレクト
+          redirectWithNull();
         });
+    }
+
+    // 全パラメータを "null" にしてリダイレクトする関数
+    function redirectWithNull() {
+      let redirectUrl = "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec";
+      redirectUrl += "?lineID=" + encodeURIComponent("null");
+      redirectUrl += "&userName=" + encodeURIComponent("null");
+      redirectUrl += "&iconURL=" + encodeURIComponent("null");
+      redirectUrl += "&email=" + encodeURIComponent("null");
+      window.location.href = redirectUrl;
     }
   </script>
 </body>
