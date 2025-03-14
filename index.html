@@ -2,11 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>LIFF Profile Redirect</title>
+  <title>ログイン中</title>
   <!-- LIFF SDKの読み込み -->
   <script src="https://static.line-scdn.net/liff/edge/versions/2.14.0/sdk.js"></script>
 </head>
 <body>
+  <p id="welcome-message"></p>
   <script>
     // LIFF IDを設定
     const liffId = "2007060333-7KJQnW68";
@@ -36,14 +37,20 @@
           const lineID = profile.userId ? profile.userId : "null";
           const iconURL = profile.pictureUrl ? profile.pictureUrl : "null";
 
+          // メッセージを画面に表示
+          const messageEl = document.getElementById("welcome-message");
+          messageEl.textContent = userName + "さんようこそ。LINEアカウントでLMCのサービスへログイン試行をしています。";
+
           // リダイレクト先のURLを組み立てる
           let redirectUrl = "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec";
           redirectUrl += "?lineID=" + encodeURIComponent(lineID);
           redirectUrl += "&userName=" + encodeURIComponent(userName);
           redirectUrl += "&iconURL=" + encodeURIComponent(iconURL);
 
-          // 組み立てたURLにリダイレクト
-          window.location.href = redirectUrl;
+          // 2秒後にリダイレクト
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 2000);
         })
         .catch((err) => {
           console.error("プロフィール情報の取得に失敗しました: ", err);
@@ -64,6 +71,3 @@
 </body>
 </html>
 
-  </script>
-</body>
-</html>
