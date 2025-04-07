@@ -3,19 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <title>ログイン中</title>
-  <!-- LIFF SDKの読み込み -->
+  <!-- Open Sansフォント -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/versions/2.14.0/sdk.js"></script>
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background-color: #fff;
+    }
+
+    .mikepad-loading {
+      width: 150px;
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .mikepad-loading .binding {
+      width: 27px;
+      height: 4px;
+      border: 2px solid #E15958;
+      margin: 0 auto;
+    }
+
+    .mikepad-loading .pad {
+      width: 15px;
+      height: 18px;
+      border: 2px solid #E15958;
+      border-top: 0;
+      padding: 6px;
+      margin: 0 auto;
+    }
+
+    .mikepad-loading .line {
+      width: 15px;
+      margin-top: 4px;
+      border-top: 2px solid #E15958;
+      opacity: 0;
+      animation: writeline 3s infinite ease-in;
+    }
+
+    .mikepad-loading .line:first-child {
+      margin-top: 0;
+    }
+
+    .mikepad-loading .line.line1 { animation-delay: 0s; }
+    .mikepad-loading .line.line2 { animation-delay: 0.5s; }
+    .mikepad-loading .line.line3 { animation-delay: 1s; }
+
+    .mikepad-loading .text {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #E15958;
+    }
+
+    @keyframes writeline {
+      0%   { width: 0px; opacity: 0; }
+      33%  { width: 15px; opacity: 1; }
+      70%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    #status-message {
+      margin-top: 80px;
+      text-align: center;
+      color: #333;
+      font-size: 14px;
+      transition: opacity 0.3s ease;
+    }
+  </style>
 </head>
 <body>
-  <p id="welcome-message"></p>
+  <div class="mikepad-loading">
+    <div class="binding"></div>
+    <div class="pad">
+      <div class="line line1"></div>
+      <div class="line line2"></div>
+      <div class="line line3"></div>
+    </div>
+    <div class="text">LMC service is loading...</div>
+  </div>
+
+  <p id="status-message"></p>
+
   <script>
-    // LIFF IDを設定
     const liffId = "2007060333-7KJQnW68";
 
-    // LIFFの初期化
     liff.init({ liffId: liffId })
       .then(() => {
-        // 未ログインの場合はログイン画面へリダイレクト
         if (!liff.isLoggedIn()) {
           liff.login();
         } else {
@@ -24,53 +102,58 @@
       })
       .catch((err) => {
         console.error("LIFFの初期化に失敗しました: ", err);
-        // 初期化に失敗した場合は全パラメータを "null" でリダイレクト
         redirectWithNull();
       });
 
-    // プロフィール情報を取得し、リダイレクトする関数
     function getProfileAndRedirect() {
       liff.getProfile()
         .then(profile => {
-          // 取得できなかった場合は "null" を設定
-          const userName = profile.displayName ? profile.displayName : "null";
-          const lineID = profile.userId ? profile.userId : "null";
-          const iconURL = profile.pictureUrl ? profile.pictureUrl : "null";
+          const userName = profile.displayName || "null";
+          const lineID = profile.userId || "null";
+          const iconURL = profile.pictureUrl || "null";
 
-          // メッセージを画面に表示
-          const messageEl = document.getElementById("welcome-message");
-          messageEl.textContent = userName + "さんようこそ。LINEアカウントでLMCのサービスへログイン試行をしています。";
+          const messages = [
+            `${userName}さんの識別情報をサーバーに送信しています...`,
+            "サーバーからの応答を待っています...",
+            "処理が完了しました"
+          ];
 
-          // リダイレクト先のURLを組み立てる
-          let redirectUrl = "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec";
-          redirectUrl += "?lineID=" + encodeURIComponent(lineID);
-          redirectUrl += "&userName=" + encodeURIComponent(userName);
-          redirectUrl += "&iconURL=" + encodeURIComponent(iconURL);
+          let messageIndex = 0;
+          const statusEl = document.getElementById("status-message");
 
-          // 2秒後にリダイレクト
+          const interval = setInterval(() => {
+            if (messageIndex < messages.length) {
+              statusEl.textContent = messages[messageIndex];
+              messageIndex++;
+            } else {
+              clearInterval(interval);
+            }
+          }, 600);
+
+          const redirectUrl = 
+            "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec" +
+            "?lineID=" + encodeURIComponent(lineID) +
+            "&userName=" + encodeURIComponent(userName) +
+            "&iconURL=" + encodeURIComponent(iconURL);
+
           setTimeout(() => {
             window.location.href = redirectUrl;
-          }, 2000);
+          }, 2400); // 0.6s * 3 + buffer
         })
         .catch((err) => {
           console.error("プロフィール情報の取得に失敗しました: ", err);
-          // プロフィール情報の取得に失敗した場合は全パラメータを "null" にしてリダイレクト
           redirectWithNull();
         });
     }
 
-    // 全パラメータを "null" にしてリダイレクトする関数
     function redirectWithNull() {
-      let redirectUrl = "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec";
-      redirectUrl += "?lineID=" + encodeURIComponent("null");
-      redirectUrl += "&userName=" + encodeURIComponent("null");
-      redirectUrl += "&iconURL=" + encodeURIComponent("null");
+      const redirectUrl = 
+        "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec" +
+        "?lineID=null&userName=null&iconURL=null";
       window.location.href = redirectUrl;
     }
   </script>
-<style>
-<center>
-</style>
 </body>
 </html>
+
 
