@@ -9,6 +9,10 @@
   <script src="https://static.line-scdn.net/liff/edge/versions/2.14.0/sdk.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Open Sans', sans-serif;
       background-color: #fff;
@@ -19,23 +23,28 @@
       align-items: center;
       height: 100vh;
       flex-direction: column;
+      text-align: center;
+    }
+
+    .mikepad-container {
+      width: 90vw;
+      max-width: 300px;
     }
 
     .mikepad-loading {
-      width: 50vw;
-      max-width: 250px;
-      min-width: 150px;
+      width: 100%;
+      margin: 0 auto;
     }
 
     .mikepad-loading .binding {
-      width: 18%;
+      width: 30%;
       height: 4px;
       border: 2px solid #E15958;
       margin: 0 auto;
     }
 
     .mikepad-loading .pad {
-      width: 25%;
+      width: 30%;
       height: 18px;
       border: 2px solid #E15958;
       border-top: 0;
@@ -60,19 +69,16 @@
     .mikepad-loading .line.line3 { animation-delay: 1s; }
 
     .mikepad-loading .text {
-      text-align: center;
       margin-top: 12px;
       font-size: 4vw;
-      min-font-size: 14px;
       color: #E15958;
     }
 
     #status-message {
       margin-top: 20px;
-      text-align: center;
+      font-size: 4.2vw;
       color: #333;
-      font-size: 4vw;
-      padding: 0 10vw;
+      line-height: 1.4;
     }
 
     @keyframes writeline {
@@ -81,20 +87,28 @@
       70%  { opacity: 1; }
       100% { opacity: 0; }
     }
+
+    @media (min-width: 600px) {
+      .mikepad-loading .text,
+      #status-message {
+        font-size: 18px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="mikepad-loading">
-    <div class="binding"></div>
-    <div class="pad">
-      <div class="line line1"></div>
-      <div class="line line2"></div>
-      <div class="line line3"></div>
+  <div class="mikepad-container">
+    <div class="mikepad-loading">
+      <div class="binding"></div>
+      <div class="pad">
+        <div class="line line1"></div>
+        <div class="line line2"></div>
+        <div class="line line3"></div>
+      </div>
+      <div class="text">LMC service is loading...</div>
     </div>
-    <div class="text">LMC service is loading...</div>
+    <p id="status-message"></p>
   </div>
-
-  <p id="status-message"></p>
 
   <script>
     const liffId = "2007060333-7KJQnW68";
@@ -125,7 +139,7 @@
             "処理が完了しました"
           ];
 
-          const displayDurations = [600, 1200, 600]; // 各メッセージの表示時間（ms）
+          const displayDurations = [600, 1200, 600];
           let index = 0;
           const statusEl = document.getElementById("status-message");
 
