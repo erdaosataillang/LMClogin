@@ -134,12 +134,12 @@
           const iconURL = profile.pictureUrl || "null";
 
           const messages = [
-            `${userName}さんの識別情報をサーバーに送信しています...`,
-            "サーバーからの応答を待っています...",
+            `${userName}さんの個人識別情報をサーバーに送信しています...`,
+            "サーバーであなたの情報を処理し、取得しています",
             "処理が完了しました"
           ];
 
-          const displayDurations = [600, 1200, 600];
+          const displayDurations = [600, 1500, 400];
           let index = 0;
           const statusEl = document.getElementById("status-message");
 
