@@ -4,20 +4,28 @@
   <meta charset="UTF-8">
   <title>ログイン中</title>
   <!-- Open Sansフォント -->
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
   <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/versions/2.14.0/sdk.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* --- 全体設定 --- */
+    :root {
+      --primary-color: #E15958; /* メインカラー */
+      --background-color: #f8f9fa; /* 背景色 */
+      --text-color: #333; /* テキストカラー */
+      --container-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 影 */
+    }
+
     * {
       box-sizing: border-box;
     }
 
     body {
       font-family: 'Open Sans', sans-serif;
-      background-color: #fff;
+      background-color: var(--background-color); /* 微妙に柔らかい背景色に変更 */
       margin: 0;
-      padding: 0;
+      padding: 20px; /* パディングを追加 */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -26,11 +34,17 @@
       text-align: center;
     }
 
+    /* --- メインコンテナ --- */
     .mikepad-container {
-      width: 90vw;
-      max-width: 300px;
+      width: 100%;
+      max-width: 320px; /* 最大幅を少し広げる */
+      padding: 24px; /* 内側の余白を調整 */
+      background-color: #fff;
+      border-radius: 12px; /* 角を丸くする */
+      box-shadow: var(--container-shadow); /* 影を追加して立体感を出す */
     }
 
+    /* --- ローディングアニメーション --- */
     .mikepad-loading {
       width: 100%;
       margin: 0 auto;
@@ -38,61 +52,66 @@
 
     .mikepad-loading .binding {
       width: 30%;
-      height: 4px;
-      border: 2px solid #E15958;
+      height: 5px; /* 少し太くする */
+      border: 2px solid var(--primary-color);
+      border-bottom: none; /* 下線をなくす */
       margin: 0 auto;
+      border-radius: 4px 4px 0 0; /* 上部の角を丸くする */
     }
 
     .mikepad-loading .pad {
-      width: 30%;
-      height: 18px;
-      border: 2px solid #E15958;
+      width: 60%; /* 幅を広げてバランス調整 */
+      height: 20px;
+      border: 2px solid var(--primary-color);
       border-top: 0;
       padding: 6px;
       margin: 0 auto;
+      border-radius: 0 0 4px 4px; /* 下部の角を丸くする */
     }
 
     .mikepad-loading .line {
       width: 100%;
       margin-top: 4px;
-      border-top: 2px solid #E15958;
+      border-top: 2px solid var(--primary-color);
       opacity: 0;
-      animation: writeline 3s infinite ease-in;
+      /* アニメーションのタイミングを調整して滑らかに */
+      animation: writeline 2.5s infinite ease-in-out; 
     }
 
     .mikepad-loading .line:first-child {
       margin-top: 0;
     }
 
+    /* アニメーションの遅延を調整 */
     .mikepad-loading .line.line1 { animation-delay: 0s; }
-    .mikepad-loading .line.line2 { animation-delay: 0.5s; }
-    .mikepad-loading .line.line3 { animation-delay: 1s; }
+    .mikepad-loading .line.line2 { animation-delay: 0.3s; }
+    .mikepad-loading .line.line3 { animation-delay: 0.6s; }
 
+    /* --- テキストスタイル --- */
     .mikepad-loading .text {
-      margin-top: 12px;
-      font-size: 4vw;
-      color: #E15958;
+      margin-top: 20px; /* 上の余白を増やす */
+      font-size: 1em; /* vwをやめて固定サイズに */
+      font-weight: 600; /* 少し太くする */
+      color: var(--primary-color);
     }
 
     #status-message {
       margin-top: 20px;
-      font-size: 4.2vw;
-      color: #333;
-      line-height: 1.4;
+      font-size: 0.9em;
+      color: var(--text-color);
+      line-height: 1.5; /* 行間を調整 */
+      min-height: 40px; /* 高さを確保してレイアウトのガタつきを防ぐ */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
+    /* --- キーフレームアニメーション --- */
     @keyframes writeline {
-      0%   { width: 0px; opacity: 0; }
-      33%  { width: 100%; opacity: 1; }
-      70%  { opacity: 1; }
+      0%   { width: 0%; opacity: 0; }
+      40%  { width: 100%; opacity: 1; }
+      80%  { opacity: 1; }
       100% { opacity: 0; }
-    }
-
-    @media (min-width: 600px) {
-      .mikepad-loading .text,
-      #status-message {
-        font-size: 18px;
-      }
     }
   </style>
 </head>
@@ -111,6 +130,7 @@
   </div>
 
   <script>
+    // LIFFのロジック
     const liffId = "2007060333-7KJQnW68";
 
     liff.init({ liffId: liffId })
@@ -127,6 +147,10 @@
       });
 
     function getProfileAndRedirect() {
+      // ★追加: URLパラメータから 'mode' を取得
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode') || 'null';
+
       liff.getProfile()
         .then(profile => {
           const userName = profile.displayName || "null";
@@ -155,11 +179,13 @@
 
           showMessage();
 
+          // ★変更: redirectUrlにmodeパラメータを追加
           const redirectUrl = 
             "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec" +
             "?lineID=" + encodeURIComponent(lineID) +
             "&userName=" + encodeURIComponent(userName) +
-            "&iconURL=" + encodeURIComponent(iconURL);
+            "&iconURL=" + encodeURIComponent(iconURL) +
+            "&mode=" + encodeURIComponent(mode); // modeを追加
 
           const totalDelay = displayDurations.reduce((a, b) => a + b, 0) + 200;
 
@@ -174,14 +200,19 @@
     }
 
     function redirectWithNull() {
+      // ★追加: URLパラメータから 'mode' を取得
+      const urlParams = new URLSearchParams(window.location.search);
+      const mode = urlParams.get('mode') || 'null';
+
+      // ★変更: redirectUrlにmodeパラメータを追加
       const redirectUrl =
         "https://script.google.com/macros/s/AKfycbyFTBDI2Dxz4_w75x8A7Ra2w8PVwVRoigAFJhZTQsilSAPYkb_QK_81zGFQulYWN6dYdg/exec" +
-        "?lineID=null&userName=null&iconURL=null";
+        "?lineID=null&userName=null&iconURL=null" +
+        "&mode=" + encodeURIComponent(mode); // modeを追加
       window.location.href = redirectUrl;
     }
   </script>
 </body>
 </html>
-
 
 
